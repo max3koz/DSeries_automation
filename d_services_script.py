@@ -552,15 +552,6 @@ def getCacheList(sessionId, filter, cacheNumber):
 
     return cacheResponseParsed
 
-
-
-
-
-
-
-
-
-
 ########################################################################################################################################################################################################
 # functions end
 ########################################################################################################################################################################################################
@@ -610,7 +601,7 @@ match dServicesEndointName:
         fieldList = "OLD"
     case _:
         #dServicesEndointIP = "10.50.109.185"        # Test system
-        dServicesEndointIP = "192.168.1.57"        # Test system
+        dServicesEndointIP = "10.12.70.226"        # Test system
 
 dServicesEndoint = "http://" + dServicesEndointIP + ":60000/test/"
 
@@ -656,6 +647,7 @@ if getCache == False:
         logWriter("User did not specify a bus to query", False)
     else:
         busId = busName2Number(dServicesEndointName, busName)
+        print(f"+++{busId}++++")
 
 loopTime = str(args.loop)
 if loopTime == "None":
@@ -663,12 +655,6 @@ if loopTime == "None":
     runOnlyOnce = True
 else:
     runOnlyOnce = False
-
-
-
-
-
-
 
 print("\n  D-Services Testing")
 logWriter("D-Services Endoint Name = [%s]" % dServicesEndointName, True)
@@ -683,7 +669,6 @@ if runOnlyOnce == False:
     logWriter("Loop Time = [%s]" % loopTime, False)
 print("  ")
 
-
 print("  Initialise a new session")
 sessionId = initSession()
 logWriter("Session ID = [%s]\n" % sessionId, True)
@@ -696,8 +681,6 @@ serverTime = getTime(sessionId)
 logWriter("System time = [%s]\n" % serverTime, True)
 #print("    Time = [%s]" % serverTime)
 #print("  ")
-
-
 if filter == "":
     logWriter("Cache filter is blank so must be a schedule or as-run query\n" % filter, True)
     #print("  Configure desired event fields")
@@ -763,52 +746,33 @@ if createBusList == True:
     #print("  Bus Description = [%s]" % busConfig['description'])
     #print("  ")
 
-
-
-
-
 #getPlaylist = False
 #getonAirEvent = False
 #runOnlyOnce = True
 
 if getPlaylist == True:
-
     try:
-
         while True:
-
             busConfig = getBusConfig(sessionId, busId)
-
             eventBUS = (busConfig['name'] + "        ")[:8]
             print("  Events Bus = [%s]" % eventBUS)
-
             if getonAirEvent == True:
                 displayOnAirEvent()
-
             print("  Get Playlist")
-
             scheduleList = getEvents(sessionId, busId, False)['events']
             #print("  Events = [%s]" % scheduleList)
             #print("  ")
-
             print("  Bus     , Date UTC  , Time UTC   , Local   , Source  ,Item                    ,Type,Seg, Duration   , Title                           , Comments")
-
             counter = 1
-
             for event in scheduleList:
-
                 for key, value in event.items():
-
                     match key:
                         case "id":
                             eventId = value
                         case _:
                             pass
-
                 eventData = getAnEvent(sessionId, busId, eventId)
-
                 #print(eventData)
-
                 eventEVENT_TYPE = eventData['data']['primary']['EVENT_TYPE']
                 eventUTC_DATE = eventData['data']['primary']['UTC_DATE']
                 eventUTC_TIME = eventData['data']['primary']['UTC_TIME']
@@ -855,50 +819,30 @@ if getPlaylist == True:
         pass
         print("\nQuit by user keystroke")
 
-
-
-
-
-
-
 #getAsRunLog = False
 #runOnlyOnce = True
 
 if getAsRunLog == True:
-
     try:
-
         while True:
-
             eventsList = []
-
             busConfig = getBusConfig(sessionId, busId)
-
             eventBUS = busConfig['name']
-
             displayOnAirEvent()
 
-
             print("  Get As-Run Log")
-
             asRunList = getEvents(sessionId, busId, True)['events']
             #print("  Events = [%s]" % scheduleList)
             #print("  ")
-
             counter = 1
-
             logWriter("  Bus     , Date UTC  , Time UTC   , Local   , Source  ,Item                    ,Type,Seg, Duration   , Title                         , Comments                      ,Brk,Aff,3rd,ProgID,Splice,EventID", True)
-
             for event in asRunList:
-
                 for key, value in event.items():
-
                     match key:
                         case "id":
                             eventId = value
                         case _:
                             pass
-
                 eventData = getAnEvent(sessionId, busId, eventId)
 
                 if eventData == 404:
@@ -1002,26 +946,17 @@ if getAsRunLog == True:
 #runOnlyOnce = False
 
 if getCache == True:
-
     try:
-
         while True:
-
             print("\n  Get Cache [%s] List" % (filter))
-
             try:
                 cacheList = getCacheList(sessionId, filter, cacheNumber)['cache list']
-
                 counter = 0
-
                 logWriter("  Avail,  Date  ,  Time  ,Schedule, Material                        , Duration  , Title", True)
-
                 for material in cacheList:
-
                     materialTitle = "                                     [TITLE and ABTITLE are blank]"
-
+                    print(f"=={material}===")
                     for key, value in material.items():
-
                         match key:
                             case "Av":
                                 materialAvail = value
@@ -1041,34 +976,23 @@ if getCache == True:
                                 materialTitle = value
                             case _:
                                 pass
-
                     counter += 1
-
                     if counter < 25:
                         logWriter("  " + (materialAvail + "     ")[:5] + "," + materialDate + "," + materialTime + "," + (materialSched + "        ")[:8] + ", " + (materialID + "                                ")[:32] + "," + materialDuration + ", " + materialTitle, True)
                     elif counter < 26:
                         print("  ..and more clips")
                     else:
                         pass
-
                 logWriter("There are [%s] [%s] items" % (counter, filter), True)
-
             except KeyError as err:
-
                 logWriter("Could not get cache [%s] for session [%s]. System returned an error:  check log for details" % (filter, sessionId), True)
-
-
-
-
             if runOnlyOnce == True:
                 break
             else:
                 serverTime = getTime(sessionId)
                 logWriter("Query finished [%s] in session [%s]" % (serverTime, sessionId), True)
                 logWriter("------------------------------------------------------------", False)
-
             print("\nPress CTRL+C to exit\n")
-
             #time.sleep(int(loopTime))
             for remaining in range(int(loopTime), 0, -1):
                 sys.stdout.write("\r")
@@ -1080,12 +1004,9 @@ if getCache == True:
         pass
         print("\nQuit by user keystroke")
 
-
-
 #print("  Ping an existing session")
 #ping = pingSession(sessionId)
 #print("  Ping = [%s]\n" % ping)
-
 
 print("  Delete the session")
 delete = deleteSession(sessionId)
