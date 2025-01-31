@@ -3,7 +3,7 @@ import logging
 import requests
 import urllib
 
-from constants import d_services_endpoint, headers, login_params
+from constants import d_services_endpoint, headers
 
 def create_session_request_body(schedule_window, as_run_log_window):
     request_body = (f"{{\"properties\": "
@@ -12,7 +12,7 @@ def create_session_request_body(schedule_window, as_run_log_window):
     return request_body
 
 class Session:
-    def __init__(self, schedule_window, as_run_log_window):
+    def __init__(self, login_params, schedule_window, as_run_log_window):
         session_url = f"{d_services_endpoint}sessions"
         logging.info(f"Create session with the D-Services URL = [%s] {session_url}")
         params = urllib.parse.urlencode(login_params, quote_via=urllib.parse.quote)
@@ -28,10 +28,12 @@ class Session:
         logging.info(f"Session Response Status Code = {session_response.status_code}")
         session_response_body = session_response.text
         logging.info(f"Session Response Body = {session_response_body}")
-        session_id = json.loads(session_response_body)['session']
-        self.session_id = session_id
+        if session_response.status_code == 200:
+            self.session_id = json.loads(session_response_body)['session']
+        self.session_response = session_response
+        self.session_response_body = session_response_body
 
-    def ping_session(self):
+    def ping_session(self, login_params):
         logging.info("Pinging a D-Service session")
         url = f"{d_services_endpoint}sessions/{self}"
         logging.info(f"D-Services URL = {url}")
