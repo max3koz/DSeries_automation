@@ -24,8 +24,6 @@ class Session:
         except ConnectionRefusedError:
             logging.info(f"Connection refused [%s] {session_url}")
             exit()
-
-        logging.info(f"Session Response Status Code = {session_response.status_code}")
         session_response_body = session_response.text
         logging.info(f"Session Response Body = {session_response_body}")
         if session_response.status_code == 200:
@@ -42,23 +40,22 @@ class Session:
         session_response = requests.get(url=url,
                                         params=urllib.parse.urlencode(login_params, quote_via=urllib.parse.quote),
                                         headers=headers)
-        logging.info(f"Session Response Status Code = {session_response.status_code}")
-        session_response_body = session_response.text
-        logging.info(f"Session Response Body = {session_response_body}")
-        return session_response.status_code
+        # logging.info(f"Session Response Status Code = {session_response.status_code}")
+        # session_response_body = session_response.text
+        # logging.info(f"Session Response Body = {session_response_body}")
+        return session_response
 
     def delete_session(self):
         logging.info(f"Deleting the D-Services session")
         url = f"{d_services_endpoint}sessions/{self}"
         logging.info(f"D-Services URL = {url}")
-        session_response = requests.delete(url=url,
-                                           headers=headers)
-        logging.info(f"Session Response Status Code = {session_response.status_code}")
-        if str(session_response.status_code) == "200":
-            logging.info(f"Session with session ID {self} was deleted successfully")
-        else:
-            logging.info(f"Session Response Content {session_response.content}")
-        return session_response.status_code
+        session_response = requests.delete(url=url, headers=headers)
+        # logging.info(f"Session Response Status Code = {session_response.status_code}")
+        # if str(session_response.status_code) == "200":
+        #     logging.info(f"Session with session ID {self} was deleted successfully")
+        # else:
+        #     logging.info(f"Session Response Content {session_response.content}")
+        return session_response
 
     def unsubscribe_session(self, subscription_id):
         logging.info(f"Deleting the D-Services session")
@@ -67,9 +64,9 @@ class Session:
         logging.info(f"{url}")
         unsubscribe_response = requests.delete(url=url,
                                                headers=headers)
-        logging.info(f"Unsubscribe response status code = {unsubscribe_response.status_code}")
-        if str(unsubscribe_response.status_code) == "200":
-            logging.info(f"Subscribe {subscription_id} on session ID {self} was unsubscribed successfully")
-        else:
-            logging.info(f"Unsubscribe Response Content {unsubscribe_response.content}")
+        # logging.info(f"Unsubscribe response status code = {unsubscribe_response.status_code}")
+        # if str(unsubscribe_response.status_code) == "200":
+        #     logging.info(f"Subscribe {subscription_id} on session ID {self} was unsubscribed successfully")
+        # else:
+        #     logging.info(f"Unsubscribe Response Content {unsubscribe_response.content}")
         return unsubscribe_response.status_code
