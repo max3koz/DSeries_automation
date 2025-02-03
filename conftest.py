@@ -5,7 +5,7 @@ import time
 from threading import Thread
 
 from Api.server_connect import create_server_connect_session, run_dservices_service, stop_server_session
-from Api.setup_update_management import (delete_file_on_server, verify_service_run, create_file_from_dict,
+from Api.setup_update_management import (delete_file_on_server, verify_service_run, create_file_on_dservices_server,
                                          update_config_dict)
 from constants import system_cfg_dict
 
@@ -14,7 +14,7 @@ from constants import system_cfg_dict
 def setup_class():
     server_connect_session = create_server_connect_session()
     update_config_dict(system_cfg_dict, {'GENERAL': {'SESSION_TIMEOUT': '1200'}})
-    create_file_from_dict(server_connect_session,"system.cfg", system_cfg_dict)
+    create_file_on_dservices_server(server_connect_session, "system.cfg", system_cfg_dict)
     server_thread = Thread(target=run_dservices_service, args=[server_connect_session])
     server_thread.start()
     time.sleep(5)
@@ -31,7 +31,7 @@ def setup_class():
 def setup_module_max():
     server_connect_session = create_server_connect_session()
     update_config_dict(system_cfg_dict, {'GENERAL': {'SESSION_TIMEOUT': '2147483647'}})
-    create_file_from_dict(server_connect_session, "system.cfg", system_cfg_dict)
+    create_file_on_dservices_server(server_connect_session, "system.cfg", system_cfg_dict)
     server_thread = Thread(target=run_dservices_service, args=[server_connect_session])
     server_thread.start()
     time.sleep(5)
@@ -48,7 +48,7 @@ def setup_module_max():
 def setup_module_min():
     server_connect_session = create_server_connect_session()
     update_config_dict(system_cfg_dict, {'GENERAL': {'SESSION_TIMEOUT': '0'}})
-    create_file_from_dict(server_connect_session,"system.cfg", system_cfg_dict)
+    create_file_on_dservices_server(server_connect_session, "system.cfg", system_cfg_dict)
     server_thread = Thread(target=run_dservices_service, args=[server_connect_session])
     server_thread.start()
     time.sleep(5)
@@ -65,7 +65,7 @@ def setup_module_min():
 def setup_module_negative():
     server_connect_session = create_server_connect_session()
     update_config_dict(system_cfg_dict, {'GENERAL': {'SESSION_TIMEOUT': '-30'}})
-    create_file_from_dict(server_connect_session,"system.cfg", system_cfg_dict)
+    create_file_on_dservices_server(server_connect_session, "system.cfg", system_cfg_dict)
     server_thread = Thread(target=run_dservices_service, args=[server_connect_session])
     server_thread.start()
     time.sleep(5)
