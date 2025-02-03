@@ -227,7 +227,7 @@ class TestPingSession:
         logging.info(f"Step 1: Create session.")
         Session(login_params, schedule_window, as_run_log_window)
 
-        logging.info(f"Step 2: Send ping session request without session ID.")
+        logging.info(f"Step 2: Send ping session request wrong session id data.")
         ping_session = Session.ping_session("a22222222", login_params)
 
         logging.info(f"Step 3: Verify that ping session request status is 404")
