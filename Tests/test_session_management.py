@@ -135,6 +135,7 @@ class TestDestroySession:
         logging.info(response_body_content)
         assert_that(response_body_content,
                     f"Error: unexpected response {response_body_content}").is_equal_to(expected_json)
+
     def test_vdser_2037_destroy_empty_session_id(self, setup_class, schedule_window=16, as_run_log_window=16):
         logging.info(f"Step 1: Create session.")
         Session(login_params, schedule_window, as_run_log_window)

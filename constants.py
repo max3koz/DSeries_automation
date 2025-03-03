@@ -9,7 +9,7 @@ d_services_endpoint_ip = "10.12.70.226"
 d_services_endpoint = f"http://{d_services_endpoint_ip}:60000/test/"
 
 # DMAS params
-dmas_active_ip = "10.12.70.12"
+dmas_active_ip = "10.12.70.16"
 
 # D-Services request params
 headers = {'Content-Type': 'application/json'}
@@ -32,6 +32,6 @@ system_cfg_dict = \
     },
     'LOG': {'GENERAL': '8', 'PRESTO': '8', 'SQI': '8', 'SCHSVR': '8'},
     'SCHSRV': {'USER': '', 'PASSWORD': '', 'PORT': '20022'},
-    'SQI': {'PORT': '22227', 'CPU': '1', 'SYSTEM_ID': 'SITE1', 'CPU_TYPE': 'Automation'},
+    'SQI': {'PORT': '22227', 'CPU': '1', 'SYSTEM_ID': 'A7500', 'CPU_TYPE': 'Automation'},
     'CORS': {'ACCESS_LIST': '*'}
 }
