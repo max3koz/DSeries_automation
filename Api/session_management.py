@@ -68,3 +68,14 @@ class Session:
                                         params=urllib.parse.urlencode(login_params, quote_via=urllib.parse.quote),
                                         headers=headers)
         return session_response
+
+    def get_server_time(self, login_params):
+        logging.info("Get a Server time")
+        url = f"{d_services_endpoint}sessions/{self}/time"
+        logging.info(f"D-Services URL = {url}")
+        session_params = f"{{'session': {self}}}"
+        logging.info(f"Params = {session_params}")
+        session_response = requests.get(url=url,
+                                        params=urllib.parse.urlencode(login_params, quote_via=urllib.parse.quote),
+                                        headers=headers)
+        return session_response
