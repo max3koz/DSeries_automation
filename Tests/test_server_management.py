@@ -1,5 +1,6 @@
 import json
 import logging
+import pytest
 
 from Api.session_management import Session
 from assertpy import assert_that
@@ -18,61 +19,72 @@ class TestGetServerStatus:
         assert_that(session_response.status_code,
                     f"Error: the session_response_code is {session_response.status_code}").is_equal_to(200)
 
-    def test_vdser_2051_get_server_status_wrong_session_id(self, setup_class, schedule_window=16, as_run_log_window=16):
-        logging.info(f"Step 1: Create session.")
-        Session(login_params, schedule_window, as_run_log_window)
+    @pytest.mark.parametrize("session_id, request_status, expected_data", [
+        pytest.param("2222222222", 404, {"parameter": "session"}, id="not exist session id"),
+        pytest.param("", 400, {'description': 'invalid uri or method', 'reference': ''}, id="empty session id"),
+        pytest.param("2a2a2a2a2a", 400, {"description": "parse error", "reference": "session"},
+                     id="wrong data type session id")
+    ])
+    def test_vdser_2051_2053_get_server_status_invalid_session_id(self, setup_class, session_id, request_status,
+                                                                  expected_data):
+        logging.info(f"Step 1: Send get server status request wrong without session ID.")
+        ping_session = Session.ping_session(session_id, login_params)
 
-        logging.info(f"Step 2: Send get server status request wrong without session ID.")
-        ping_session = Session.ping_session("22222222", login_params)
-
-        logging.info(f"Step 3: Verify that get server status request status is 404")
+        logging.info(f"Step 2: Verify that get server status request status is \"{request_status}\"")
         logging.info(ping_session)
         assert_that(ping_session.status_code,
-                    f"Error: the session_response_code is {ping_session.status_code}").is_equal_to(404)
+                    f"Error: the session_response_code is {ping_session.status_code}").is_equal_to(request_status)
 
-        logging.info("Step 4: Verify that response contains: {'parameter': 'session'}")
-        expected_json = {'parameter': 'session'}
-        response_body_content = json.loads(ping_session.content.decode("utf-8"))
-        logging.info(response_body_content)
-        assert_that(response_body_content,
-                    f"Error: unexpected response {response_body_content}").is_equal_to(expected_json)
+        logging.info(f"Step 3: Verify that server time data errors are: {expected_data}")
+        for key, value in expected_data.items():
+            data = json.loads(ping_session.text)[key]
+            logging.info(f"The server time data error is \"{key}\": \"{value}\"")
+            assert_that(data,
+                        f"Error: The server time data error is not \"{data}\"").is_equal_to(value)
 
-    def test_vdser_2052_get_server_status_empty_session_id(self, setup_class, schedule_window=16, as_run_log_window=16):
+
+class TestGetServerTime:
+    def test_vdser_2054_get_server_time_valid_session_id(self, setup_class, schedule_window=16, as_run_log_window=16):
         logging.info(f"Step 1: Create session.")
-        Session(login_params, schedule_window, as_run_log_window)
+        session = Session(login_params, schedule_window, as_run_log_window)
 
-        logging.info(f"Step 2: Send get server status request without empty session ID.")
-        ping_session = Session.ping_session("", login_params)
+        logging.info(f"Step 2: Send get server status request.")
+        session_response = Session.get_server_status(session.session_id, login_params)
 
-        logging.info(f"Step 3: Verify that get server status request status is 404")
-        logging.info(ping_session)
-        assert_that(ping_session.status_code,
-                    f"Error: the session_response_code is {ping_session.status_code}").is_equal_to(400)
+        logging.info(f"Step 3: Verify that get server status is 200")
+        assert_that(session_response.status_code,
+                    f"Error: the session_response_code is {session_response.status_code}").is_equal_to(200)
 
+        logging.info(f"Step 4: Send get server time request.")
+        time_response = Session.get_server_time(session.session_id, login_params)
 
+        logging.info(f"Step 5: Verify that get server time request status is 200")
+        assert_that(session_response.status_code,
+                    f"Error: the session_response_code is {time_response.status_code}").is_equal_to(200)
 
-        logging.info("Step 4: Verify that response contains: {'description': 'invalid uri or method', 'reference': ''}")
-        expected_json = {'description': 'invalid uri or method', 'reference': ''}
-        response_body_content = json.loads(ping_session.content.decode("utf-8"))
-        logging.info(response_body_content)
-        assert_that(response_body_content,
-                    f"Error: unexpected response {response_body_content}").is_equal_to(expected_json)
+        logging.info(f"Step 6: Verify that server time value is not empty")
+        server_time = json.loads(time_response.text)['time']["time point"]
+        logging.info(f"The server time value is {server_time}")
+        assert_that(server_time, f"Error: the server time value is empty").is_not_empty()
 
-    def test_vdser_2039_get_server_status_wrong_session_id_data(self, setup_class, schedule_window=16, as_run_log_window=16):
-        logging.info(f"Step 1: Create session.")
-        Session(login_params, schedule_window, as_run_log_window)
+    @pytest.mark.parametrize("session_id, request_status, expected_data", [
+        pytest.param("2222222222", 404, {"parameter": "session"}, id="not exist session id"),
+        pytest.param("", 400, {"description": "parse error", "reference": "session"}, id="empty session id"),
+        pytest.param("2a2a2a2a2a", 400, {"description": "parse error", "reference": "session"},
+                     id="wrong data type session id")
+    ])
+    def test_vdser_2055_2057_get_server_time_invalid_session_id(self, setup_class, session_id,
+                                                                request_status,expected_data):
+        logging.info(f"Step 1: Send get server time request.")
+        time_response = Session.get_server_time(session_id, login_params)
 
-        logging.info(f"Step 2: Send get server status request without wrong session id data.")
-        ping_session = Session.ping_session("a22222222", login_params)
+        logging.info(f"Step 2: Verify that get server time request status is \"{request_status}\"")
+        assert_that(time_response.status_code,
+                    f"Error: the session_response_code is {time_response.status_code}").is_equal_to(request_status)
 
-        logging.info(f"Step 3: Verify that ping session request status is 404")
-        logging.info(ping_session)
-        assert_that(ping_session.status_code,
-                    f"Error: the session_response_code is {ping_session.status_code}").is_equal_to(400)
-
-        logging.info("Step 4: Verify that response contains: {'description': 'parse error', 'reference': 'session'}")
-        expected_json = {'description': 'parse error', 'reference': 'session'}
-        response_body_content = json.loads(ping_session.content.decode("utf-8"))
-        logging.info(response_body_content)
-        assert_that(response_body_content,
-                    f"Error: unexpected response {response_body_content}").is_equal_to(expected_json)
+        logging.info(f"Step 3: Verify that server time data errors are: {expected_data}")
+        for key, value in expected_data.items():
+            data = json.loads(time_response.text)[key]
+            logging.info(f"The server time data error is \"{key}\": \"{value}\"")
+            assert_that(data,
+                        f"Error: The server time data error is not \"{data}\"").is_equal_to(value)

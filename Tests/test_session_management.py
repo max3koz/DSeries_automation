@@ -242,3 +242,36 @@ class TestPingSession:
         logging.info(response_body_content)
         assert_that(response_body_content,
                     f"Error: unexpected response {response_body_content}").is_equal_to(expected_json)
+
+@pytest.mark.skip(reason="The test only for stress testing")
+class TestStress:
+    def test_vdser_stress_valid_session(self, setup_class, schedule_window=16, as_run_log_window=16):
+        logging.info(f"Step 1: Create session.")
+        session = Session(login_params, schedule_window, as_run_log_window)
+        for i in range(1,1000):
+            time.sleep(1)
+            logging.info(f"Step 2.{i}: Send ping session request.")
+            session_response = Session.ping_session(session.session_id, login_params)
+
+            logging.info(f"Step 3.{i}: Verify that ping session request status is 200")
+            assert_that(session_response.status_code,
+                        f"Error: the session_response_code is {session_response.status_code}").is_equal_to(200)
+
+            logging.info(f"Step 4.{i}: Send get server status request.")
+            session_response = Session.get_server_status(session.session_id, login_params)
+
+            logging.info(f"Step 5.{i}: Verify that get server status is 200")
+            assert_that(session_response.status_code,
+                        f"Error: the session_response_code is {session_response.status_code}").is_equal_to(200)
+
+            logging.info(f"Step 6.{i}: Send get server time request.")
+            time_response = Session.get_server_time(session.session_id, login_params)
+
+            logging.info(f"Step 7.{i}: Verify that get server time request status is 200")
+            assert_that(session_response.status_code,
+                        f"Error: the session_response_code is {time_response.status_code}").is_equal_to(200)
+
+            logging.info(f"Step 8.{i}: Verify that server time value is not empty")
+            server_time = json.loads(time_response.text)['time']["time point"]
+            logging.info(f"The server time value is {server_time}")
+            assert_that(server_time, f"Error: the server time value is empty").is_not_empty()
