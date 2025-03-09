@@ -2,7 +2,7 @@ import json
 import logging
 import pytest
 
-from Api.session_management import Session
+from Components_Dservises.session_management import Session
 from assertpy import assert_that
 from constants import login_params
 

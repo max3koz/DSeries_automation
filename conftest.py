@@ -4,9 +4,9 @@ import time
 
 from threading import Thread
 
-from Api.server_connect import create_server_connect_session, run_dservices_service, stop_server_session
-from Api.setup_update_management import (delete_file_on_server, verify_service_run, create_file_on_dservices_server,
-                                         update_config_dict)
+from Components_Dservises.server_connect import create_server_connect_session, run_dservices_service, stop_server_session
+from Components_Dservises.setup_update_management import (delete_file_on_server, verify_service_run, create_file_on_dservices_server,
+                                                          update_config_dict)
 from constants import system_cfg_dict
 
 
