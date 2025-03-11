@@ -4,7 +4,7 @@ import pytest
 
 from assertpy import assert_that
 
-from Components_Dservises.buses_management import get_bus_configuration, get_bus_status
+from Components_Dservises.buses_management import get_bus_configuration, get_bus_status, get_buses
 from Components_Dservises.session_management import Session
 from constants import login_params, schedule_window, as_run_log_window
 
@@ -39,7 +39,7 @@ class TestBusMNG:
                            "timezone": "UTC",
                            "day change": "P0DT0H0M0S",
                            "frame rate": "30",
-                           "alternate schedules": ["15", "16"],
+                           "alternate schedules": ["16", "17"],
                            "machines": [{"category": "none", "monitor name": ""},
                                         {"category": "none", "monitor name": ""},
                                         {"category": "none", "monitor name": ""},
@@ -125,3 +125,42 @@ class TestBusMNG:
         response_body = json.loads(get_bus_configuration_response.text)
         assert_that(response_body, f"Error: the error get bus configuration response is "
                                    f"{get_bus_configuration_response.status_code}").is_equal_to(expected_data)
+
+    def test_vdser_2070_get_buses_valid_data(self, setup_class):
+        logging.info(f"Step 1: Send get server status request.")
+        session_id = self.session.session_id
+        get_buses_response = get_buses(session_id, login_params)
+
+        logging.info(f"Step 2: Verify that get bus configuration status is 200")
+        assert_that(get_buses_response.status_code,
+                    f"Error: the get buses response is {get_buses_response.status_code}").is_equal_to(200)
+
+        logging.info(f"Step 3: Verify that responce body with expected data")
+        expected_result = {'buses': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14',
+                                     '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27',
+                                     '28', '29', '30', '31', '32', '33', '34']}
+        response_body = json.loads(get_buses_response.text)
+        assert_that(response_body, f"Error: the get bus status response is "
+                                   f"{get_buses_response.status_code}").is_equal_to(expected_result)
+
+    @pytest.mark.parametrize("session_id, request_status, expected_data", [
+        pytest.param("2222222222", 404, {"parameter": "session"}, id="wrong session id"),
+        pytest.param("", 400, {"description": "parse error", "reference": "session"},
+                     id="empty session id and valid bus ID"),
+        pytest.param("a2a2a2a2a2", 400, {"description": "parse error", "reference": "session"},
+                     id="bad data type session id and valid bus ID"),
+    ])
+    def test_vdser_2071_2073_get_bus_configuration_invalid_data(self, session_id, request_status,
+                                                                expected_data, setup_class):
+        logging.info(f"Step 1: Send get server status request.")
+        get_buses_response = get_buses(session_id, login_params)
+
+        logging.info(f"Step 2: Verify that get bus configuration status is {request_status}")
+        assert_that(get_buses_response.status_code,
+                    f"Error: the get bus configuration response is "
+                    f"{get_buses_response.status_code}").is_equal_to(request_status)
+
+        logging.info(f"Step 3: Verify that responce body with expected data")
+        response_body = json.loads(get_buses_response.text)
+        assert_that(response_body, f"Error: the error get bus configuration response is "
+                                   f"{get_buses_response.status_code}").is_equal_to(expected_data)

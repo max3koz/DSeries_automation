@@ -22,3 +22,12 @@ def get_bus_status(session_id, bus_ID, login_params):
                                           params=urllib.parse.urlencode(login_params, quote_via=urllib.parse.quote),
                                           headers=headers)
     return get_bus_status_response
+
+def get_buses(session_id, login_params):
+    logging.info(f"Deleting the D-Services session")
+    url = f"{d_services_endpoint}buses?session={session_id}"
+    logging.info(f"D-Services URL = {url}")
+    get_buses_response = requests.get(url=url,
+                                      params=urllib.parse.urlencode(login_params, quote_via=urllib.parse.quote),
+                                      headers=headers)
+    return get_buses_response
